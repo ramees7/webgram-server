@@ -1,9 +1,9 @@
 const users = require('../Models/userSchema')
 const jwt = require('jsonwebtoken')
 const posts = require('../Models/postSchema')
-const accountSid = process.env.accountSid
-const authToken = process.env.authToken
-const client = require('twilio')(accountSid, authToken)
+// const accountSid = process.env.accountSid
+// const authToken = process.env.authToken
+// const client = require('twilio')(accountSid, authToken)
 const mongoose = require('mongoose')
 let otp, user
 
