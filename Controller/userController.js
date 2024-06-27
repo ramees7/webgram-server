@@ -1,7 +1,9 @@
 const users = require('../Models/userSchema')
 const jwt = require('jsonwebtoken')
 const posts = require('../Models/postSchema')
-
+// const accountSid = process.env.accountSid
+// const authToken = process.env.authToken
+// const client = require('twilio')(accountSid, authToken)
 const mongoose = require('mongoose')
 let otp, user
 
@@ -23,7 +25,26 @@ exports.registerUser = async (req, res) => {
                     console.log("inside pass")
 
                     user = new users({ name, username, email, phone, password, confirmpassword, followers: [], following: [], bio: "", image: "profile-empty-icon.png", posts: [], story: [], dateOfRegister: new Date() })
-                    
+                    // let digits="0123456789"
+                    // otp=""
+                    // for(let i=0 ; i<6 ;i++){
+                    //     otp +=digits[Math.floor(Math.random()*10)]
+                    // }
+                    // console.log(otp);
+                    // console.log(user);
+
+                    // await client.messages
+                    // .create({
+                    //     body: `eda mwonee nee happy alle ${otp}`,
+                    //     messagingServiceSid: 'MG823219c1e4fc3e10bdd8fd319e0644ce',
+                    //     // from:"+919207424420",
+                    //     // from:"+18507506067",
+                    //     to: `+91${phone}`
+                    // })
+                    // .then(message => console.log(message))
+                    // // .then(()=>res.status(200).json({msg:"message sent"}))
+                    // .done();
+
                     res.status(200).json(user)
                     await user.save()
                     // console.log(user)
