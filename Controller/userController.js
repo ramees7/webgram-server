@@ -1,6 +1,7 @@
 const users = require('../Models/userSchema')
 const jwt = require('jsonwebtoken')
 const posts = require('../Models/postSchema')
+const bcrypt = require('bcryptjs')
 // const accountSid = process.env.accountSid
 // const authToken = process.env.authToken
 // const client = require('twilio')(accountSid, authToken)
@@ -11,6 +12,7 @@ exports.registerUser = async (req, res) => {
     try {
         console.log("inside Register")
         const { name, username, email, phone, password, confirmpassword } = req.body
+        console.log(confirmpassword);
         const existingUser = await users.findOne({ phone })
         const existingUsername = await users.findOne({ username })
         if (existingUser) {
@@ -24,7 +26,13 @@ exports.registerUser = async (req, res) => {
                 if (password === confirmpassword) {
                     console.log("inside pass")
 
-                    user = new users({ name, username, email, phone, password, confirmpassword, followers: [], following: [], bio: "", image: "profile-empty-icon.png", posts: [], story: [], dateOfRegister: new Date() })
+                    // Generate a salt for password hashing (recommended at least 10 rounds)
+                    const salt = await bcrypt.genSalt(10);
+
+                    // Hash the password using the generated salt
+                    const hashedPassword = await bcrypt.hash(password, salt);
+
+                    user = new users({ name, username, email, phone, password: hashedPassword, followers: [], following: [], bio: "", image: "profile-empty-icon.png", posts: [], story: [], dateOfRegister: new Date() })
                     // let digits="0123456789"
                     // otp=""
                     // for(let i=0 ; i<6 ;i++){
@@ -44,9 +52,9 @@ exports.registerUser = async (req, res) => {
                     // .then(message => console.log(message))
                     // // .then(()=>res.status(200).json({msg:"message sent"}))
                     // .done();
-
-                    res.status(200).json(user)
                     await user.save()
+                    res.status(200).json(user)
+
                     // console.log(user)
                 }
 
@@ -67,18 +75,19 @@ exports.login = async (req, res) => {
     try {
         console.log("inside login");
         const { phone, password } = req.body
-        const existingUser = await users.findOne({ phone, password })
-        console.log(existingUser, "login")
-        // if (existingAdmin) {
-        //     const token = jwt.sign({ userId: existingAdmin._id }, process.env.JWT_SUPERKEY)
-        //     res.status(200).json({
-        //         existingAdmin,
-        //         token,
-        //         role: "Admin"
-        //     })
-        // }
-        // else {
-        if (existingUser) {
+        // const existingUser = await users.findOne({ phone, password })
+        const existingUser = await users.findOne({ phone });
+
+        if (!existingUser) {
+            return res.status(401).json("No User Found! Enter Valid Phone Number");
+        }
+        // Compare password using bcrypt (ensure bcrypt is imported)
+        const isMatch = await bcrypt.compare(password, existingUser.password);
+
+        if (!isMatch) {
+            return res.status(401).json("Invalid Password! Please try again.");
+        }
+        else {
             const token = jwt.sign({ userId: existingUser._id }, process.env.JWT_SUPERKEY)
             res.status(200).json({
                 existingUser,
@@ -87,13 +96,10 @@ exports.login = async (req, res) => {
             })
 
         }
-        else {
-            res.status(401).json("No User Found ! Enter Valid Data")
-        }
-        // }
     }
     catch (err) {
         res.status(406).json(err)
+        console.log(err);
     }
 }
 
@@ -121,14 +127,14 @@ exports.updateUserProfile = async (req, res) => {
         const id = req.payload
         console.log(id, "lol");
         // const { name, username, bio, phone, password, confirmpassword, email, followers, following, posts, savedPosts, likedPosts, dateOfRegister, story } = req.body
-        const { name, username ,bio} = req.body
-        console.log(req.body)   
+        const { name, username, bio } = req.body
+        console.log(req.body)
         const image = req.file ? req.file.filename : req.body.image
         // const result = await users.updateOne(
         //     { _id: id }, { name, username, image, bio, phone, password, confirmpassword, email, followers, following, posts, savedPosts, likedPosts, dateOfRegister, story  }
         // )
         const result = await users.updateOne(
-            { _id: id }, { name, username, image, bio}
+            { _id: id }, { name, username, image, bio }
         )
         res.status(200).json(result)
         // console.log(result)
@@ -145,12 +151,12 @@ exports.updateUserProfile = async (req, res) => {
 exports.getAllUsersList = async (req, res) => {
     try {
         console.log("Inside Get Users list")
-        const searchKey=req.query.search
+        const searchKey = req.query.search
         console.log(req.query)
-        const query={
-            $or:[
-                {name:{$regex:searchKey,$options:"i"}},
-                {username:{$regex:searchKey,$options:"i"}},
+        const query = {
+            $or: [
+                { name: { $regex: searchKey, $options: "i" } },
+                { username: { $regex: searchKey, $options: "i" } },
             ]
         }
         const result = await users.find(query)

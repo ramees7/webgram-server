@@ -19,10 +19,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    confirmpassword: {
-        type: String,
-        required: true
-    },
     email: {
         type: String,
         required: true,
@@ -63,7 +59,9 @@ const userSchema = new mongoose.Schema({
         type: Array,
         default: []
     }
-})
+},
+    { timestamps: true }
+)
 
 const users = mongoose.model("users", userSchema)
 module.exports = users
