@@ -14,7 +14,10 @@ const jwtMiddleware = require('../Middleware/jwtMiddleware')
 const router=new express.Router()
 
 router.post('/registeruser',userController.registerUser)
+router.post('/registerotp',userController.verifyOtp)
 router.post('/loginuser',userController.login)
+router.post("/forgetPassword", userController.forgetPassword);
+router.post("/verifyOtpAndResetPassword", userController.verifyOtpAndResetPassword);
 router.get('/getuserslist',userController.getAllUsersList)
 router.get('/getcurrentuser',jwtMiddleware,userController.getCurrentUser)
 router.patch('/updateuserprofile',jwtMiddleware,multerConfig.single("image"),userController.updateUserProfile)
