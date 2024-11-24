@@ -15,7 +15,7 @@ const corsOptions = {
       callback(new Error("Not allowed by CORS"));
     }
   },
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT","PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true, // If using cookies or authentication
 };
@@ -31,7 +31,7 @@ const PORT = 4000 || process.env.PORT;
 webgramServer.use("/upload", express.static("./uploads"));
 
 webgramServer.listen(PORT, () => {
-  console.log("Ekart server started " + PORT);
+  console.log("WebGram server started " + PORT);
 });
 
 webgramServer.get("/", (req, res) => {
